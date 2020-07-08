@@ -4,16 +4,23 @@ const rsa = require('node-rsa')()
 router.prefix('/msg')
 
 router.post('/*', function (ctx, next) {
-  // console.log(ctx.url)
 
   privateKey = ctx.url.replace('/msg/', '')
-  privateKey = '-----BEGIN RSA PRIVATE KEY-----\n'+privateKey+'\n-----END RSA PRIVATE KEY-----'
-  console.log(privateKey)
+  var privateKey = new Buffer(privateKey, 'base64').toString();
+  // console.log(privateKey)
+
+  cipher = ctx.request.rawBody
+  // console.log(cipher)
+
   rsa.importKey(privateKey, 'pkcs1-private-pem')
-  chiphertext = ctx.request.rawBody
-  console.log(chiphertext)
-  const decrypted = rsa.decrypt(chiphertext, 'utf-8');
-  console.log(decrypted)
+  try {
+    const decrypted = rsa.decrypt(cipher, 'utf-8');
+    console.log(decrypted)
+  }catch(err) {
+    console.log(err.message)
+    ctx.body = err.message
+    return
+  }
 
   ctx.body = 'this is a users response!'
 })
