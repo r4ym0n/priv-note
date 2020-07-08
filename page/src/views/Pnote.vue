@@ -71,8 +71,10 @@ export default {
   methods: {
     postData: function() {
       const that = this;
-      let reqBody = this.rsa().RSAencrypt(that.textarea2) 
-      let reqPath = this.rsa().GetPrivateKey()
+      const rsa = this.rsa()
+      const reqBody = rsa.RSAencrypt(that.textarea2) 
+      const reqPath = rsa.GetPrivateKeyB64()
+      
       axios
         .post("http://127.0.0.1:3000/msg/"+reqPath, reqBody)
         .then(response => {
@@ -88,8 +90,10 @@ export default {
       const key = new NodeRSA({ b: 512 });
       let publicKey = key.exportKey("pkcs1-public-pem");  //公钥
       let privateKey = key.exportKey("pkcs1-private-pem");//私钥
-      publicKey = publicKey.replace(/\n/g,'').replace('-----BEGIN RSA PUBLIC KEY-----','').replace('-----END RSA PUBLIC KEY-----','');
-      privateKey = privateKey.replace(/\n/g,'').replace('-----BEGIN RSA PRIVATE KEY-----','').replace('-----END RSA PRIVATE KEY-----','');
+
+      // console.log(privateKey)
+      // publicKey = publicKey.replace(/\n/g,'').replace('-----BEGIN RSA PUBLIC KEY-----','').replace('-----END RSA PUBLIC KEY-----','');
+      // privateKey = privateKey.replace(/\n/g,'').replace('-----BEGIN RSA PRIVATE KEY-----','').replace('-----END RSA PRIVATE KEY-----','');
       return {
         RSAencrypt: function(pas) {
           //实例化jsEncrypt对象
@@ -99,7 +103,9 @@ export default {
           // console.log(publicKey);
           // console.log('加密：'+jse.encrypt(pas))
           // return jse.encrypt(pas);
-          console.log(publicKey);
+          // console.log(publicKey);
+          // console.log(privateKey);
+          console.log('encrypt user data')
           return key.encrypt(pas,'base64')
         },
         //解密方法
@@ -114,7 +120,19 @@ export default {
         },
         GetPrivateKey: function(){
           return privateKey;
+        },
+        GetPubilcKey: function(){
+          return privateKey;
+        },
+        GetPubilcKeyB64: function(){
+          let publicKeyB64 = new Buffer(publicKey).toString('base64');
+          return publicKeyB64;
+        },
+        GetPrivateKeyB64: function(){
+          let privateKeyB64 = new Buffer(privateKey).toString('base64');
+          return privateKeyB64;
         }
+
       };
     }
   }
