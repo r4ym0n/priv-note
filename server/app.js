@@ -19,7 +19,7 @@ app.use(bodyparser({
   enableTypes:['json', 'form', 'text']
 }))
 
-app.use(logger())
+// app.use(logger())
 app.use(require('koa-static')(__dirname + '/public/app'))
 
 // app.use(views(__dirname + '/views', {
@@ -39,7 +39,9 @@ app.use(async (ctx, next) => {
   const start = new Date()
   await next()
   const ms = new Date() - start
-  console.log(`${ctx.method} ${ctx.url} - ${ms}ms`)
+  let url = ctx.url
+  if(RegExp("/msg/*", "g").exec(url) != null){url = '/msg/*'}
+  console.log(`${ctx.method} ${url} - ${ms}ms`)
 })
 
 // routes
