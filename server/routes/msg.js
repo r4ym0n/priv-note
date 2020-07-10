@@ -40,9 +40,10 @@ router.get('/de/*', async function (ctx, next) {
     } else {
       result = ""
     }
-    console.log(result)
   }catch(err) {
     console.log(err.message)
+    console.log(err.stack);
+
     ctx.body = err.message
     return
   }

@@ -25,7 +25,7 @@
             <p>Get your secret message from URL above</p>
 
             <el-card shadow="never">
-              <p style="overflow-wrap:break-word">{{host}}</p>
+              <p style="overflow-wrap:break-word" :title="message">{{host}}</p>
             </el-card>
           </div>
           <div v-else-if="sentStatus == Status.MSG">
@@ -45,21 +45,12 @@
         <el-row>
           <div style="margin: 20px 0;"></div>
           <div v-if="sentStatus == Status.EDIT">
-            <el-button type="primary" style="width:100%; height:70px" v-on:click="postData">OK</el-button>
+            <el-button type="primary" style="width:100%; height:70px" v-on:click="postData">Submit it</el-button>
           </div>
           <div v-else-if="sentStatus == Status.MSG">
-            <el-button
-              type="primary"
-              style="width:100%; height:70px"
-              v-on:click="postData"
-            >Delete it</el-button>
+            <el-button type="primary" style="width:100%; height:70px" v-on:click="goHome">Delete it</el-button>
           </div>
-          <div v-else>
-            <el-button
-              type="primary"
-              style="width:100%; height:70px"
-              v-on:click="postData"
-            >Submit it</el-button>
+          <div v-else><el-button  type="primary"  style="width:100%; height:70px"   v-clipboard:copy="message">Copy it</el-button>
           </div>
         </el-row>
       </el-main>
@@ -156,6 +147,8 @@ export default {
           console.log(error);
         });
     },
+    goHome: function() {window.location = '/'},
+    copy2board: function() {},
     postData: function() {
       const that = this;
       const rsa = this.rsa();
