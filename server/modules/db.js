@@ -4,9 +4,9 @@ const MongoClient = require('mongodb').MongoClient
 
 // Create cached connection variable
 let cachedDb = null
-if (process.env.MONGODB_URI == undefined) {
+if (process.env.MONGO_URL == undefined) {
     // local dev-env
-    process.env.MONGODB_URI = "mongodb://root:example@127.0.0.1:27017/admin"
+    process.env.MONGO_URL = "mongodb://root:example@127.0.0.1:27017/admin"
 }
 
 
@@ -31,7 +31,7 @@ class MDB {
                 },
             }
         }
-        privateFunctions().connectToDatabase(process.env.MONGODB_URI)
+        privateFunctions().connectToDatabase(process.env.MONGO_URL)
     }
 
 
