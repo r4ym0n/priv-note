@@ -53,7 +53,6 @@
 // @ is an alias to /src
 // import HelloWorld from "@/components/HelloWorld.vue";
 import axios from "axios";
-// import JsEncrypt from "jsencrypt";
 import NodeRSA from 'node-rsa';
 
 // import func from "../../../vue-temp/vue-editor-bridge";
@@ -90,31 +89,13 @@ export default {
       const key = new NodeRSA({ b: 512 });
       let publicKey = key.exportKey("pkcs1-public-pem");  //公钥
       let privateKey = key.exportKey("pkcs1-private-pem");//私钥
-
-      // console.log(privateKey)
-      // publicKey = publicKey.replace(/\n/g,'').replace('-----BEGIN RSA PUBLIC KEY-----','').replace('-----END RSA PUBLIC KEY-----','');
-      // privateKey = privateKey.replace(/\n/g,'').replace('-----BEGIN RSA PRIVATE KEY-----','').replace('-----END RSA PRIVATE KEY-----','');
       return {
         RSAencrypt: function(pas) {
-          //实例化jsEncrypt对象
-          // let jse = new JsEncrypt();
-          //设置公钥
-          // jse.setPublicKey(publicKey);
-          // console.log(publicKey);
-          // console.log('加密：'+jse.encrypt(pas))
-          // return jse.encrypt(pas);
-          // console.log(publicKey);
-          // console.log(privateKey);
           console.log('encrypt user data')
           return key.encrypt(pas,'base64')
         },
         //解密方法
         RSAdecrypt: function(pas) {
-          // let jse = new JsEncrypt();
-          // 私钥
-          // jse.setPrivateKey(privateKey);
-          // console.log('解密：'+jse.decrypt(pas))
-          // return jse.decrypt(pas);
           console.log(privateKey);
           return key.decrypt(pas, 'utf-8')
         },
