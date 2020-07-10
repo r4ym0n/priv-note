@@ -1,32 +1,53 @@
 const router = require('koa-router')()
 const rsa = require('node-rsa')()
-// const db = require('../modules/db')()
+const db = require('../modules/db')()
 
 router.prefix('/msg')
 
-router.post('/*', function (ctx, next) {
+router.post('/en/*', function (ctx, next) {
+  let cipherB64 = ctx.url.replace('/msg/en/', '')
 
-  privateKey = ctx.url.replace('/msg/', '')
-  // console.log(privateKey)
-
-  var privateKey = new Buffer(privateKey, 'base64').toString('ascii');
-  // console.log(privateKey)
-
-  cipher = ctx.request.rawBody
-  // console.log(cipher)
+  const privateKeyB64 = ctx.request.rawBody
+  const privateKey = new Buffer(privateKeyB64, 'base64').toString('ascii');
   rsa.importKey(privateKey, 'pkcs1-private-pem')
+  
+  try {
+      const decrypted = rsa.decrypt(cipherB64, 'utf-8');
+      // console.log(decrypted)
+      db.insertOne({privateKey:privateKeyB64,
+                    cipher:cipherB64
+    })
+  }catch(err) {
+    console.log(err.message)
+    ctx.body = err.message
+    return
+  }
+  ctx.body = 'this is a users response!'
+})
+
+
+router.get('/de/*', async function (ctx, next) {
+
+  cipherB64 = ctx.url.replace('/msg/de/', '')
+  // var privateKey = new Buffer(privateKeyB64, 'base64').toString('ascii');
+  // console.log(privateKey)
+  // rsa.importKey(privateKey, 'pkcs1-private-pem')
 
   try {
-    const decrypted = rsa.decrypt(cipher, 'utf-8');
-    console.log(decrypted)
-    // db.insertOne({privateKey:decrypted})
+    result = await db.findKeyByCipher({cipher:cipherB64})
+    if (result !== ''){
+      await db.deleteItemByCipher({cipher:cipherB64})
+    } else {
+      result = ""
+    }
+    console.log(result)
   }catch(err) {
     console.log(err.message)
     ctx.body = err.message
     return
   }
 
-  ctx.body = 'this is a users response!'
+  ctx.body = result
 })
 
 router.get('/bar', function (ctx, next) {

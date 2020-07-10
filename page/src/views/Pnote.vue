@@ -8,18 +8,59 @@
 
       <el-main class="site-body">
         <!-- <div style="margin: 20px 0;"></div> -->
-        <el-input
-          type="textarea"
-          :autosize="{ minRows: 18, maxRows: 18}"
-          placeholder="write your Message HERE~"
-          v-model="textarea2"
-          maxlength="500"
-          show-word-limit
-        ></el-input>
+
+        <div class="site-content">
+          <div v-if="sentStatus == Status.EDIT">
+            <el-input
+              type="textarea"
+              :autosize="{ minRows: 18, maxRows: 18}"
+              placeholder="write your Message HERE~"
+              v-model="textareaMsgFrom"
+              maxlength="500"
+              show-word-limit
+              resize="none"
+            ></el-input>
+          </div>
+          <div v-else-if="sentStatus == Status.SENT">
+            <p>Get your secret message from URL above</p>
+
+            <el-card shadow="never">
+              <p style="overflow-wrap:break-word">{{host}}</p>
+            </el-card>
+          </div>
+          <div v-else-if="sentStatus == Status.MSG">
+            <el-input
+              type="textarea"
+              :autosize="{ minRows: 18, maxRows: 18}"
+              placeholder="write your Message HERE~"
+              v-model="textareaMsgTo"
+              maxlength="500"
+              :readonly="true"
+              show-word-limit
+              resize="none"
+            ></el-input>
+          </div>
+        </div>
 
         <el-row>
           <div style="margin: 20px 0;"></div>
-          <el-button type="primary" style="width:100%; height:70px" v-on:click="postData">Submit</el-button>
+          <div v-if="sentStatus == Status.EDIT">
+            <el-button type="primary" style="width:100%; height:70px" v-on:click="postData">OK</el-button>
+          </div>
+          <div v-else-if="sentStatus == Status.MSG">
+            <el-button
+              type="primary"
+              style="width:100%; height:70px"
+              v-on:click="postData"
+            >Delete it</el-button>
+          </div>
+          <div v-else>
+            <el-button
+              type="primary"
+              style="width:100%; height:70px"
+              v-on:click="postData"
+            >Submit it</el-button>
+          </div>
         </el-row>
       </el-main>
       <el-footer class="site-footer">
@@ -53,7 +94,7 @@
 // @ is an alias to /src
 // import HelloWorld from "@/components/HelloWorld.vue";
 import axios from "axios";
-import NodeRSA from 'node-rsa';
+import NodeRSA from "node-rsa";
 
 // import func from "../../../vue-temp/vue-editor-bridge";
 
@@ -62,23 +103,71 @@ export default {
   components: {},
   data() {
     return {
-      textarea1: "",
-      textarea2: ""
+      textareaMsgTo: "",
+      textareaMsgFrom: "",
+      sentStatus: 0,
+      cipherB64: "",
+      
+      Status: {
+        EDIT: 0,
+        SENT: 1,
+        MSG: 2
+      },
+      get origin() {
+        return location.origin; 
+      },
+      get host() {
+        return location.origin + "/#/" + this.cipherB64;
+      }
     };
   },
-  mounted() {},
+  mounted() {
+    console.log(this.hash);
+    this.showMsg();
+  },
   methods: {
+    showMsg: function() {
+      if (location.hash.length < 5) {
+        return;
+      }
+      this.sentStatus = this.Status.MSG;
+
+      let that = this;
+      let cipherB64 = location.hash.replace("#/", "");
+      const key = this.rsa();
+
+      axios
+        .get(this.origin+"/msg/de/" + cipherB64)
+        .then(response => {
+          this.info = response;
+          // console.log(this.info);
+          // that.sentStatus = 2;
+          let privateKeyB64 = response.data;
+          if (privateKeyB64 !== "") {
+            key.importPrivateKeyB64(privateKeyB64);
+            let text = key.RSAdecrypt(cipherB64, "utf-8");
+            that.textareaMsgTo = text;
+          } else {
+            that.textareaMsgTo = "Message not found, maybe deleted?";
+          }
+        })
+        .catch(function(error) {
+          // 请求失败处理
+          console.log(error);
+        });
+    },
     postData: function() {
       const that = this;
-      const rsa = this.rsa()
-      const reqBody = rsa.RSAencrypt(that.textarea2) 
-      const reqPath = rsa.GetPrivateKeyB64()
-      
+      const rsa = this.rsa();
+      const reqPath = rsa.RSAencrypt(that.textareaMsgFrom);
+      const reqBody = rsa.GetPrivateKeyB64();
+      this.cipherB64 = reqPath;
       axios
-        .post("http://127.0.0.1:3000/msg/"+reqPath, reqBody)
+        .post(this.origin+"/msg/en/" + reqPath, reqBody)
         .then(response => {
           this.info = response;
           console.log(this.info);
+          that.sentStatus = that.Status.SENT;
         })
         .catch(function(error) {
           // 请求失败处理
@@ -87,33 +176,38 @@ export default {
     },
     rsa: function() {
       const key = new NodeRSA({ b: 512 });
-      let publicKey = key.exportKey("pkcs1-public-pem");  //公钥
-      let privateKey = key.exportKey("pkcs1-private-pem");//私钥
+      let publicKey = key.exportKey("pkcs1-public-pem"); //公钥
+      let privateKey = key.exportKey("pkcs1-private-pem"); //私钥
       return {
         RSAencrypt: function(pas) {
-          console.log('encrypt user data')
-          return key.encrypt(pas,'base64')
+          console.log("encrypt user data");
+          console.log(this.GetPrivateKeyB64());
+          return key.encrypt(pas, "base64");
+        },
+        importPrivateKeyB64: function(privateKeyB64) {
+          const privateKey = new Buffer(privateKeyB64, "base64").toString(
+            "ascii"
+          );
+          key.importKey(privateKey, "pkcs1-private-pem");
         },
         //解密方法
         RSAdecrypt: function(pas) {
-          console.log(privateKey);
-          return key.decrypt(pas, 'utf-8')
+          return key.decrypt(pas, "utf-8");
         },
-        GetPrivateKey: function(){
+        GetPrivateKey: function() {
           return privateKey;
         },
-        GetPubilcKey: function(){
+        GetPubilcKey: function() {
           return privateKey;
         },
-        GetPubilcKeyB64: function(){
-          let publicKeyB64 = new Buffer(publicKey).toString('base64');
+        GetPubilcKeyB64: function() {
+          let publicKeyB64 = new Buffer(publicKey).toString("base64");
           return publicKeyB64;
         },
-        GetPrivateKeyB64: function(){
-          let privateKeyB64 = new Buffer(privateKey).toString('base64');
+        GetPrivateKeyB64: function() {
+          let privateKeyB64 = new Buffer(privateKey).toString("base64");
           return privateKeyB64;
         }
-
       };
     }
   }
@@ -121,6 +215,9 @@ export default {
 </script>
 
 <style scoped>
+.site-content {
+  height: 390px;
+}
 .site-footer p {
   padding: 0 10px;
 }
