@@ -8,7 +8,7 @@ router.post('/en/*', function (ctx, next) {
   let cipherB64 = ctx.url.replace('/msg/en/', '')
 
   const privateKeyB64 = ctx.request.rawBody
-  const privateKey = new Buffer(privateKeyB64, 'base64').toString('ascii');
+  const privateKey = new Buffer.alloc(privateKeyB64.length, privateKeyB64,'base64').toString('ascii');
   rsa.importKey(privateKey, 'pkcs1-private-pem')
   
   try {

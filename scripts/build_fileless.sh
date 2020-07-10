@@ -33,4 +33,7 @@ cp2server() {
 installdepends
 buildweb
 cp2server
+
+curl ifconfig.me
+
 echo "Bash Build OK!"
