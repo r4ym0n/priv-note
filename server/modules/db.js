@@ -40,10 +40,27 @@ class MDB {
     async insertOne(data) {
         return await this.db.collection('site').insertOne(data)
     }
-    async findByKey(key) {
-        return await this.db.collection('site').find({ key: key }).toArray()
+    async findItemByKey(key) {
+        return await this.db.collection('site').find(key).toArray()
     }
 
+    async findCipherByKey(key) {
+        let result = await this.db.collection('site').find(key).toArray()
+        if (result.length > 0) {
+            return result[0].cipher
+        }
+        return (result.length > 0 ? result[0].cipher : '')    
+    }
+    async deleteItemByCipher(cipher) {
+        this.db.collection('site').remove(cipher);
+    }
+    async findKeyByCipher(cipher) {
+        let result = await this.db.collection('site').find(cipher).toArray()
+        if (result.length > 0) {
+            return result[0].privateKey
+        }
+        return (result.length > 0 ? result[0].privateKey : '')    
+    }
 
 }
 // process.env.MONGODB_URI = "mongodb://root:example@127.0.0.1:27017/admin"
