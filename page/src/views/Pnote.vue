@@ -25,14 +25,14 @@
             <p>Get your secret message from URL above</p>
 
             <el-card shadow="never">
-              <p style="overflow-wrap:break-word" :title="message">{{host}}</p>
+              <p style="overflow-wrap:break-word">{{host}}</p>
             </el-card>
           </div>
           <div v-else-if="sentStatus == Status.MSG">
             <el-input
               type="textarea"
               :autosize="{ minRows: 18, maxRows: 18}"
-              placeholder="write your Message HERE~"
+              placeholder="Message not found, maybe deleted?"
               v-model="textareaMsgTo"
               maxlength="500"
               :readonly="true"
@@ -50,7 +50,7 @@
           <div v-else-if="sentStatus == Status.MSG">
             <el-button type="primary" style="width:100%; height:70px" v-on:click="goHome">Delete it</el-button>
           </div>
-          <div v-else><el-button  type="primary"  style="width:100%; height:70px"   v-clipboard:copy="host">Copy it</el-button>
+          <div v-else><el-button  type="primary"  style="width:100%; height:70px" v-clipboard:success="copy2board"  v-clipboard:copy="host">Copy it</el-button>
           </div>
         </el-row>
       </el-main>
@@ -78,6 +78,8 @@
         </el-row>
       </el-footer>
     </el-container>
+
+    <!-- <Elinfo/> -->
   </div>
 </template>
 
@@ -86,12 +88,14 @@
 // import HelloWorld from "@/components/HelloWorld.vue";
 import axios from "axios";
 import NodeRSA from "node-rsa";
-
+// import Elinfo from "@/components/el-info.vue";
 // import func from "../../../vue-temp/vue-editor-bridge";
 
 export default {
   name: "Pnote",
-  components: {},
+  components: {
+    
+  },
   data() {
     return {
       textareaMsgTo: "",
@@ -152,7 +156,9 @@ export default {
         });
     },
     goHome: function() {window.location = '/'},
-    copy2board: function() {},
+    copy2board: function() {
+      this.$notify.info({ title: 'info', message: 'Copied'});
+    },
     postData: function() {
       const that = this;
       const rsa = this.rsa();
@@ -162,13 +168,15 @@ export default {
       axios
         .post(this.origin+"/msg/en/" + reqPath, reqBody)
         .then(response => {
-          this.info = response;
-          console.log(this.info);
+          console.log(response);
+
           that.sentStatus = that.Status.SENT;
+          that.$notify({ type: 'success', title: 'success', message: 'Submit Successfully'});
         })
         .catch(function(error) {
           // 请求失败处理
-          console.log(error);
+          that.$notify.error({title: 'error', message: 'Submit failed'});
+          console.log(error.message);
         });
     },
     rsa: function() {
