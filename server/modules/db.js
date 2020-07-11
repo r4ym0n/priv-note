@@ -16,15 +16,21 @@ class MDB {
 
     async getDBConnection(uri) {
         if (cachedDb) {
-          this.db = cachedDb
-          return cachedDb
+            this.db = cachedDb
+            return cachedDb
         }
-        const client = await MongoClient.connect(uri, {useUnifiedTopology: true, useNewUrlParser: true })
-        const db = await client.db()
-        cachedDb = db
-        this.db = db
-        return db
-      }
+        try {
+            const client = await MongoClient.connect(uri, { useUnifiedTopology: true, useNewUrlParser: true })
+            const db = await client.db()
+            console.log('db connection established')
+            cachedDb = db
+            this.db = db
+            return db
+        } catch (err) {
+            console.log(err.message)
+        }
+
+    }
 
     async insertOne(data) {
         await this.getDBConnection(process.env.MONGO_URL)
@@ -59,7 +65,7 @@ class MDB {
 }
 function factory() {
 
-    return new MDB()
+    return new MDB
 }
 
 module.exports = factory
