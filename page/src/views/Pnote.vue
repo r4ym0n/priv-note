@@ -104,6 +104,7 @@ export default {
         SENT: 1,
         MSG: 2
       },
+      firstPlayFlag: true,
       get origin() {
         return location.origin; 
       },
@@ -113,8 +114,11 @@ export default {
     };
   },
   mounted() {
-    console.log(this.hash);
-    this.showMsg();
+    if(this.firstPlayFlag) {
+      this.showMsg();
+      this.firstPlayFlag = false;
+    }
+    
   },
   methods: {
     showMsg: function() {
