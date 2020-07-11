@@ -50,7 +50,7 @@
           <div v-else-if="sentStatus == Status.MSG">
             <el-button type="primary" style="width:100%; height:70px" v-on:click="goHome">Delete it</el-button>
           </div>
-          <div v-else><el-button  type="primary"  style="width:100%; height:70px"   v-clipboard:copy="message">Copy it</el-button>
+          <div v-else><el-button  type="primary"  style="width:100%; height:70px"   v-clipboard:copy="host">Copy it</el-button>
           </div>
         </el-row>
       </el-main>
