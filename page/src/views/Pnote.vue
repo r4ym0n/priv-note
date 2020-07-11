@@ -23,7 +23,7 @@
           </div>
           <div v-else-if="sentStatus == Status.SENT">
             <p>Get your secret message from URL above</p>
-
+            <p>Copy it, remember it can be only Access ONCE!</p>
             <el-card shadow="never">
               <p style="overflow-wrap:break-word">{{host}}</p>
             </el-card>
