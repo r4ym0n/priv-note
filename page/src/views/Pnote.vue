@@ -269,13 +269,24 @@ export default {
 .pnote-container {
   padding-top: 60px;
 }
-.el-container {
-  /* width: 860px; */
-  width: 85%;
-  margin: 0 auto;
-  padding: 0px;
-  padding-top: 60px;
+@media (min-width: 860px) and (max-width: 1280px) {
+  .el-container {
+    width: 860px; 
+    margin: 0 auto;
+    padding: 0px;
+    padding-top: 60px;
+  } 
 }
+
+@media (min-width: 320px) and (max-width: 767px) {
+  .el-container {
+      width: 100%; 
+      margin: 0 auto;
+      padding: 0px;
+      padding-top: 60px;
+  } 
+}
+
 .site-header {
   color: white;
 }
