@@ -135,7 +135,7 @@ export default {
       let that = this;
       let privateKeyB64 = location.hash.replace("#/", "");
       const key = this.aes();
-
+      that.textareaMsgTo = "Loading Wait...";
       axios
         .get(this.origin+"/msg/de/" + privateKeyB64)
         .then(response => {
@@ -152,6 +152,8 @@ export default {
           }
         })
         .catch(function(error) {
+          that.$notify.error({title: 'error', message: 'fetch MSG failed, Try again'});
+          that.textareaMsgTo = "";
           // 请求失败处理
           console.log(error);
         });
@@ -268,7 +270,8 @@ export default {
   padding-top: 60px;
 }
 .el-container {
-  width: 860px;
+  /* width: 860px; */
+  width: 85%;
   margin: 0 auto;
   padding: 0px;
   padding-top: 60px;
