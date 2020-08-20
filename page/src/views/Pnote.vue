@@ -88,6 +88,8 @@
 // import HelloWorld from "@/components/HelloWorld.vue";
 import axios from "axios";
 import NodeRSA from "node-rsa";
+import crypto from "crypto"
+
 // import Elinfo from "@/components/el-info.vue";
 // import func from "../../../vue-temp/vue-editor-bridge";
 
@@ -101,7 +103,7 @@ export default {
       textareaMsgTo: "",
       textareaMsgFrom: "",
       sentStatus: 0,
-      cipherB64: "",
+      privateKeyB64: "",
       
       Status: {
         EDIT: 0,
@@ -113,7 +115,7 @@ export default {
         return location.origin; 
       },
       get host() {
-        return location.origin + "/#/" + this.cipherB64;
+        return location.origin + "/#/" + this.privateKeyB64;
       }
     };
   },
@@ -130,21 +132,20 @@ export default {
         return;
       }
       this.sentStatus = this.Status.MSG;
-
       let that = this;
-      let cipherB64 = location.hash.replace("#/", "");
-      const key = this.rsa();
+      let privateKeyB64 = location.hash.replace("#/", "");
+      const key = this.aes();
 
       axios
-        .get(this.origin+"/msg/de/" + cipherB64)
+        .get(this.origin+"/msg/de/" + privateKeyB64)
         .then(response => {
           this.info = response;
           // console.log(this.info);
           // that.sentStatus = 2;
-          let privateKeyB64 = response.data;
+          let cipherB64 = response.data;
           if (privateKeyB64 !== "") {
-            key.importPrivateKeyB64(privateKeyB64);
-            let text = key.RSAdecrypt(cipherB64, "utf-8");
+            key.importKey(privateKeyB64);
+            let text = key.aesDecrypt(cipherB64);
             that.textareaMsgTo = text;
           } else {
             that.textareaMsgTo = "Message not found, maybe deleted?";
@@ -161,15 +162,14 @@ export default {
     },
     postData: function() {
       const that = this;
-      const rsa = this.rsa();
-      const reqPath = rsa.RSAencrypt(that.textareaMsgFrom);
-      const reqBody = rsa.GetPrivateKeyB64();
-      this.cipherB64 = reqPath;
+      const aes = this.aes();
+      const reqBody = aes.aesEncrypt(that.textareaMsgFrom);
+      const reqPath = aes.GetKey();
+      this.privateKeyB64 = reqPath;
       axios
         .post(this.origin+"/msg/en/" + reqPath, reqBody)
         .then(response => {
           console.log(response);
-
           that.sentStatus = that.Status.SENT;
           that.$notify({ type: 'success', title: 'success', message: 'Submit Successfully'});
         })
@@ -179,6 +179,44 @@ export default {
           console.log(error.message);
         });
     },
+    aes: function() {
+      let initKey = crypto.createHash('md5')
+                .update(crypto.randomBytes(1024))
+                .digest('hex');
+      let key = '<Import passwd>';
+
+      return {  
+        aesEncrypt: function (data) {
+            const cipher = crypto.createCipher('aes192', initKey);
+            let crypted = cipher.update(data, 'utf8', 'hex');
+            crypted += cipher.final('hex');
+            return crypted;
+        },
+        aesDecrypt: function (encrypted) {
+            const decipher = crypto.createDecipher('aes192', key);
+            let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+            decrypted += decipher.final('utf8');
+            return decrypted;
+        },
+
+        importKeyB64: function(KeyB64) {
+          const Key = new Buffer(KeyB64, "base64").toString("ascii");
+          key = Key;
+        },
+        importKey: function(Key) {
+          key = Key;
+        },
+        GetKeyB64: function() {
+          let KeyB64 = new Buffer(initKey).toString("base64");
+          return KeyB64;
+        },
+        GetKey: function() {
+          return initKey;
+        },
+
+      }
+    }
+    ,
     rsa: function() {
       const key = new NodeRSA({ b: 512 });
       let publicKey = key.exportKey("pkcs1-public-pem"); //公钥

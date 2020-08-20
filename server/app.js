@@ -42,7 +42,8 @@ app.use(async (ctx, next) => {
   await next()
   const ms = new Date() - start
   let url = ctx.url
-  if(RegExp("/msg/*", "g").exec(url) != null){url = '/msg/*'}
+  if(RegExp("/msg/de/*", "g").exec(url) != null){url = '/msg/de/*'}
+  if(RegExp("/msg/en/*", "g").exec(url) != null){url = '/msg/en/*'}
   console.log(`${ctx.method} ${url} - ${ms}ms`)
 })
 

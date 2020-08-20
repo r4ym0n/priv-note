@@ -53,6 +53,10 @@ class MDB {
         await this.getDBConnection(process.env.MONGO_URL)
         this.db.collection('site').deleteOne(cipher);
     }
+    async deleteItemByKey(key) {
+        await this.getDBConnection(process.env.MONGO_URL)
+        this.db.collection('site').deleteOne(key);
+    }
     async findKeyByCipher(cipher) {
         await this.getDBConnection(process.env.MONGO_URL)
         let result = await this.db.collection('site').find(cipher).toArray()

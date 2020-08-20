@@ -9,6 +9,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "crypto": "^1.0.1",
+    "debug": "^4.1.1",
     "dotenv": "^8.2.0",
     "koa": "^2.7.0",
     "koa-bodyparser": "^4.3.0",
