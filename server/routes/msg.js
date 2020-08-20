@@ -10,7 +10,7 @@ router.get('/de/*', async function (ctx, next) {
   try {
     result = await db.findCipherByKey({aesKey:key})
     if (result !== ''){
-      await db.deleteItemByKey({aes:key})
+      await db.deleteItemByKey({aesKey:key})
     } else {
       result = ""
     }

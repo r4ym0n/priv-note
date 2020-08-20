@@ -32,7 +32,7 @@
             <el-input
               type="textarea"
               :autosize="{ minRows: 18, maxRows: 18}"
-              placeholder="Message not found, maybe deleted?"
+              placeholder="Loading... please wait"
               v-model="textareaMsgTo"
               maxlength="500"
               :readonly="true"
@@ -135,7 +135,6 @@ export default {
       let that = this;
       let privateKeyB64 = location.hash.replace("#/", "");
       const key = this.aes();
-      that.textareaMsgTo = "Loading Wait...";
       axios
         .get(this.origin+"/msg/de/" + privateKeyB64)
         .then(response => {
